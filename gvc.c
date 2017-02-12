@@ -11,9 +11,14 @@ void getInfinVerb(char (*infinVerb)[30]);
 void getSubPronoun(char (*subPronoun)[5]);
 #include "gvc_utils.c"
 // conjugation util functions
-void setInitialConjVerb(char (*conjVerb)[30], char (*infinVerb)[30], char (*subPronoun)[5], char (*separablePrefix)[10], char (*inseparablePrefix)[10]);
+void setInitialConjVerb(char (*conjVerb)[30], char (*infinVerb)[30], char subPronoun[5], char (*separablePrefix)[10], char (*inseparablePrefix)[10]);
 void prefixSet(char (*infinVerb)[30], char (*separablePrefix)[10], char (*inseparablePrefix)[10]);
 char stemChangeCheck(char (*infinVerb)[30]);
+void conjugationControl(char (*conjVerb)[30], char (*infinVerb)[30], char subPronoun[5]);
+void conjugateSein(char (*conjVerb)[30], char subPronoun[5]);
+void conjugateModal(char (*conjVerb)[30], char subPronoun[5]);
+void conjugateERN_ELN(char (*conjVerb)[30], char r_or_l[2], char subPronoun[5]);
+void conjugateNormal(char (*conjVerb)[30], char subPronoun[5]);
 #include "conjugation_utils.c"
 
 
@@ -26,10 +31,10 @@ int main(void) {
     char separablePrefix[10];
     char inseparablePrefix[10];
 
-    setInitialConjVerb(&conjVerb, &infinVerb, &subPronoun, &separablePrefix, &inseparablePrefix);
+    setInitialConjVerb(&conjVerb, &infinVerb, subPronoun, &separablePrefix, &inseparablePrefix);
 
-    printf("conjverb: %s\nseppre: %s\ninsep: %s\n", conjVerb, separablePrefix, inseparablePrefix);
-    
-    // up to conjugation control in present tense!!
+    conjugationControl(&conjVerb, &infinVerb, subPronoun);
+
+    printf("%s %s%s %s\n", subPronoun, inseparablePrefix, conjVerb, separablePrefix);
 
 }

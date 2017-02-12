@@ -1,15 +1,36 @@
+/*
+* Sets initial values for infinVerb and subPronoun.
+*
+* char (*infinVerb)[30]: infinitive verb (pointer)
+* char (*subPronoun)[5]: subject pronoun (pointer)
+*
+* returns: Nothing, but infinVerb and subPronoun are assigned values.
+*/
 void setInitialValues(char (*infinVerb)[30], char (*subPronoun)[5]) {
     getInfinVerb(infinVerb);    
     getSubPronoun(subPronoun);
-    printf("Verb: %s\nPronoun: %s\n", *infinVerb, *subPronoun);
 }
 
+/*
+* Capitalizes strings passed in.
+*
+* char (*word)[]: any given string (pointer)
+*
+* returns: Nothing, but the passed in string is capitalized.
+*/
 void capitalizeWord(char (*word)[]) {
     int wordLen = strlen(*word);
     for (int i = 0; i < wordLen; i++)
         (*word)[i] = toupper((*word)[i]);
 }
 
+/*
+* Gets, validates, and sets the user-given value for infinVerb.
+*
+* char (*infinVerb)[30]: infintive verb (pointer)
+*
+* returns: Nothing, but infinVerb is assigned a value.
+*/
 void getInfinVerb(char (*infinVerb)[30]) {
     int infinVerbLen = 0;
     do {
@@ -20,6 +41,13 @@ void getInfinVerb(char (*infinVerb)[30]) {
     } while (strcmp(*infinVerb, "SEIN") != 0 && strcmp(*infinVerb, "TUN") != 0 && ((*infinVerb)[infinVerbLen - 2] != 'E' || (*infinVerb)[infinVerbLen - 1] != 'N') && ((*infinVerb)[infinVerbLen - 3] != 'E' || ((*infinVerb)[infinVerbLen - 2] != 'R' && (*infinVerb)[infinVerbLen - 2] != 'L') || (*infinVerb)[infinVerbLen - 1] != 'N'));
 }
 
+/*
+* Gets validates, and sets the user-given value for subPronoun.
+*
+* char (*subPronoun)[5]: subject pronoun (pointer)
+*
+* returns: Nothing, but subPronoun is assigned a value.
+*/
 void getSubPronoun(char (*subPronoun)[5]) {
     int subPronounLen = 0;
     do {

@@ -1,11 +1,23 @@
-void setInitialConjVerb(char (*conjVerb)[30], char (*infinVerb)[30], char(*subPronoun)[5], char (*separablePrefix)[10], char (*inseparablePrefix)[10]) {
+/*
+* Sets the inital value of conjVerb based on infinVerb.
+* Uses a number of conditions to determine what kind of verb the infinVerb is
+*
+* char (*conjVerb)[30]: conjugated verb (pointer)
+* char (*infinVerb)[30]: infinitive verb (pointer)
+* char subPronoun[5]: subject pronoun
+* char (*separablePrefix)[10]: separable prefix (pointer) 
+* char (*inseparablePrefix)[10]: inseparable prefix (pointer)
+*
+* returns: Nothing, but the variables passed in as pointers are manipulated as needed.
+*/
+void setInitialConjVerb(char (*conjVerb)[30], char (*infinVerb)[30], char subPronoun[5], char (*separablePrefix)[10], char (*inseparablePrefix)[10]) {
     prefixSet(infinVerb, separablePrefix, inseparablePrefix);
 
     int infinVerbLen = strlen(*infinVerb);
     int verbEndingIndex;
     char type;
 
-    if (strcmp(*subPronoun, "DU") == 0 || strcmp(*subPronoun, "ER") == 0 || strcmp(*subPronoun, "SIE") == 0 || strcmp(*subPronoun, "ES") == 0)
+    if (strcmp(subPronoun, "DU") == 0 || strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0)
         type = stemChangeCheck(infinVerb);
 
     if (strcmp(*infinVerb, "SEIN") == 0)
@@ -45,6 +57,15 @@ void setInitialConjVerb(char (*conjVerb)[30], char (*infinVerb)[30], char(*subPr
     }
 }
 
+/*
+* Sets the separable or inseparable prefixes to the correct variables and removes them from infinVerb.
+*
+* char (*infinVerb)[30]: infinitive verb (pointer)
+* char (*separablePrefix)[10]: separable prefix (pointer)
+* char (*inseparablePrefix)[10]: inseparable prefix (pointer)
+*
+* returns: Nothing, but the variables passed in as pointers are manipulated as needed.
+*/
 void prefixSet(char (*infinVerb)[30], char (*separablePrefix)[10], char (*inseparablePrefix)[10]) { 
 	if((*infinVerb)[0] == 'A' && (*infinVerb)[1] == 'B') {
 		(*separablePrefix)[0] = 'A'; (*separablePrefix)[1] = 'B'; (*separablePrefix)[2] = '\0';
@@ -130,15 +151,19 @@ void prefixSet(char (*infinVerb)[30], char (*separablePrefix)[10], char (*insepa
 
 }
 
+/*
+* Checks infinVerb to determine if it has a stem change by compariing it against a list of stem chang verbs.
+*
+* char (*infinVerb)[30]: infinitive verb (pointer)
+*
+* returns: One of the following codes:
+* 	E = E TO I
+* 	A = A TO AE
+*	I = E TO IE
+* 	Z = COULDN'T LOAD LIST
+* 	N = VERB NOT IN LIST
+*/
 char stemChangeCheck(char (*infinVerb)[30]) { 
-    /* CODES
-    * E = E TO I
-    * A = A TO AE
-    * I = E TO IE
-    * Z = COULDN'T LOAD LIST
-    * N = VERB NOT IN LIST
-    */
-
     FILE* verb_list = fopen("stem_change_verbs.txt", "r"); 
     if(verb_list == NULL) {
         printf("ERROR! Could not load verb list!\n"); 
@@ -173,4 +198,162 @@ char stemChangeCheck(char (*infinVerb)[30]) {
     fclose(verb_list); 
 
     return 'N';
+}
+
+/*
+* Manages which function to use based on what infinVerb is.
+*
+* char (*conjVerb)[30]: conjugated verb (pointer)
+* char (*infinVerb)[30]: infinitive verb (pointer)
+* char subPronoun[5]: subject pronoun
+*
+* returns: Nothing, variables are simply moved around to the appropriate function
+*/
+void conjugationControl(char (*conjVerb)[30], char (*infinVerb)[30], char subPronoun[5]) {
+	int infinVerbLen = strlen(*infinVerb);
+
+	if (strcmp(*infinVerb, "SEIN") == 0)
+		conjugateSein(conjVerb, subPronoun);
+	else if(strcmp(*infinVerb, "MUESSEN") == 0 || strcmp(*infinVerb, "KOENNEN") == 0 || strcmp(*infinVerb, "MOEGEN") == 0 || strcmp(*infinVerb, "DUERFEN") == 0 || strcmp(*infinVerb, "SOLLEN") == 0 || strcmp(*infinVerb, "WOLLEN") == 0 || strcmp(*infinVerb, "WISSEN") == 0)
+		conjugateModal(conjVerb, subPronoun);
+	else if((*infinVerb)[infinVerbLen - 3] == 'E' && ((*infinVerb)[infinVerbLen - 2] == 'R' || (*infinVerb)[infinVerbLen - 2] == 'L') && (*infinVerb)[infinVerbLen - 1] == 'N') { 
+		char r_or_l[2]; 
+		r_or_l[0] = (*infinVerb)[strlen(*infinVerb) - 2];
+		r_or_l[1] = '\0'; 
+		conjugateERN_ELN(conjVerb, r_or_l, subPronoun);
+	} else 
+		conjugateNormal(conjVerb, subPronoun);
+
+}
+
+/*
+* Conjugates the verb SEIN.
+*
+* char (*conjVerb)[30]: conjugated verb (pointer)
+* char subPronoun[5]: subject pronoun
+*
+* returns: Nothing, but conjVerb is manipulated.
+*/
+void conjugateSein(char (*conjVerb)[30], char subPronoun[5]) { 
+    if(strcmp(subPronoun, "ICH") == 0) { 
+        (*conjVerb)[0] = 'B'; (*conjVerb)[1] = 'I'; (*conjVerb)[2] = 'N'; (*conjVerb)[3] = '\0'; 
+    } else if(strcmp(subPronoun, "DU") == 0) {
+		(*conjVerb)[0] = 'B'; (*conjVerb)[1] = 'I'; (*conjVerb)[2] = 'S'; (*conjVerb)[3] = 'T'; (*conjVerb)[4] = '\0'; 
+	} else if(strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0) { 
+		(*conjVerb)[0] = 'I'; (*conjVerb)[1] = 'S'; (*conjVerb)[2] = 'T'; (*conjVerb)[3] = '\0';
+	} else if(strcmp(subPronoun, "WIR") == 0 || strcmp(subPronoun, "SIEP") == 0) { 
+		(*conjVerb)[0] = 'S'; (*conjVerb)[1] = 'I'; (*conjVerb)[2] = 'N'; (*conjVerb)[3] = 'D'; (*conjVerb)[4] = '\0'; 
+	} else if(strcmp(subPronoun, "IHR") == 0) {
+		(*conjVerb)[0] = 'S'; (*conjVerb)[1] = 'E'; (*conjVerb)[2] = 'I'; (*conjVerb)[3] = 'D'; (*conjVerb)[4] = '\0';
+	}
+}
+
+/*
+* Conjugates modal verbs and WISSEN.
+*
+* char (*conjVerb)[30]: conjugated verb (pointer)
+* char subPronoun: subject pronoun
+*
+* returns: Nothing, but conjVerb is manipulated.
+*/
+void conjugateModal(char (*conjVerb)[30], char subPronoun[5]) { 
+	if(strcmp(subPronoun, "ICH") == 0 || strcmp(subPronoun, "DU") == 0 || strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0) { 
+		if(strcmp(*conjVerb, "MUESS") == 0) {
+			(*conjVerb)[2] = 'S'; (*conjVerb)[4] = '\0'; 
+			if(strcmp(subPronoun, "DU") == 0) 
+				(*conjVerb)[4] = 'T'; (*conjVerb)[5] = '\0'; 
+		} else if(strcmp(*conjVerb, "KOENN") == 0) { 
+			(*conjVerb)[1] = 'A'; (*conjVerb)[2] = 'N'; (*conjVerb)[4] = '\0'; 
+			if(strcmp(subPronoun, "DU") == 0)
+				(*conjVerb)[4] = 'S'; (*conjVerb)[5] = 'T'; (*conjVerb)[6] = '\0';
+		} else if(strcmp(*conjVerb, "MOEG") == 0) { 
+			(*conjVerb)[1] = 'A'; (*conjVerb)[2] = 'G'; (*conjVerb)[3] = '\0'; 
+			if(strcmp(subPronoun, "DU") == 0)
+				(*conjVerb)[3] = 'S'; (*conjVerb)[4] = 'T'; (*conjVerb)[5] = '\0'; 
+		} else if(strcmp(*conjVerb, "DUERF") == 0) { 
+			(*conjVerb)[1] = 'A'; (*conjVerb)[2] = 'R'; (*conjVerb)[3] = 'F'; (*conjVerb)[4] = '\0';
+			if(strcmp(subPronoun, "DU") == 0) 
+				(*conjVerb)[4] = 'S'; (*conjVerb)[5] = 'T'; (*conjVerb)[6] ='\0'; 
+		} else if(strcmp(*conjVerb, "SOLL") == 0) { 
+			if(strcmp(subPronoun, "DU") == 0) 
+				(*conjVerb)[4] = 'S'; (*conjVerb)[5] = 'T'; (*conjVerb)[6] = '\0';
+		} else if(strcmp(*conjVerb, "WOLL") == 0) { 
+			(*conjVerb)[1] = 'I'; 
+			if(strcmp(subPronoun, "DU") == 0) 
+				(*conjVerb)[4] = 'S'; (*conjVerb)[5] = 'T'; (*conjVerb)[6] = '\0'; 
+		} else if(strcmp(*conjVerb, "WISS") == 0) { 
+			(*conjVerb)[1] = 'E'; (*conjVerb)[2] = 'I'; (*conjVerb)[4] = 'S'; (*conjVerb)[5] = '\0';
+			if(strcmp(subPronoun, "DU") == 0) 
+				strcat(*conjVerb, "T"); 
+		}
+	} else {
+		if(strcmp(subPronoun, "WIR") == 0 || strcmp(subPronoun, "SIEP") == 0)
+			strcat(*conjVerb, "EN"); 
+		else
+			strcat(*conjVerb, "T"); 
+	}
+}
+
+/*
+* Conjugates ERN and ELN verbs.
+*
+* char (*conjVerb)[30]: conjugated verb (pointer)
+* char r_or_l[2]: either and 'R' or 'L' based on whichever is in the verb
+*
+* returns: Nothing, but conjVerb is manipulated.
+*/
+void conjugateERN_ELN(char (*conjVerb)[30], char r_or_l[2], char subPronoun[5]) { 
+	if(strcmp(subPronoun, "ICH") == 0) { 
+		strcat(*conjVerb, r_or_l); 
+		strcat(*conjVerb, "E"); 
+	} else { 
+		strcat(*conjVerb, "E"); 
+		strcat(*conjVerb, r_or_l); 
+		
+		if(strcmp(subPronoun, "DU") == 0)
+			strcat(*conjVerb, "ST"); 
+		else if(strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0 || strcmp(subPronoun, "IHR") == 0) 
+			strcat(*conjVerb, "T"); 
+		else if(strcmp(subPronoun, "WIR") == 0 || strcmp(subPronoun, "SIEP") == 0) 
+			strcat(*conjVerb, "N");
+	}
+}
+
+/*
+* Conjugates normal verbs.
+*
+* char (*conjVerb)[30]: conjugated verb (pointer)
+* char subPronoun[5]: subject pronoun
+*
+* returns: Nothing, but conjVerb is manipulated.
+*/
+void conjugateNormal(char (*conjVerb)[30], char subPronoun[5]) { 
+	if(strcmp(*conjVerb, "HAB") == 0 && (strcmp(subPronoun, "DU") == 0 || strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0)) 
+		(*conjVerb)[2] = '\0'; 
+	else if(strcmp(*conjVerb, "WIRD") == 0 && strcmp(subPronoun, "DU") == 0)
+		(*conjVerb)[3] = '\0';
+
+	int conjVerbLen = strlen(*conjVerb) - 1; 
+	if(strcmp(subPronoun, "ICH") == 0) { 
+		strcat(*conjVerb, "E"); 
+	} else if(strcmp(subPronoun, "DU") == 0) { 
+		if((*conjVerb)[conjVerbLen] == 'S') 
+			strcat(*conjVerb, "T");
+		else if((*conjVerb)[conjVerbLen] == 'T' || (*conjVerb)[conjVerbLen] == 'D')
+			strcat(*conjVerb, "EST"); 
+		else 
+			strcat(*conjVerb, "ST"); 
+	} else if(strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0 || strcmp(subPronoun, "IHR") == 0) {
+        if((strcmp(subPronoun, "ER") == 0 || strcmp(subPronoun, "SIE") == 0 || strcmp(subPronoun, "ES") == 0) && strcmp(*conjVerb, "WIRD") == 0) 
+            (*conjVerb)[4] = '\0'; 
+		else if((*conjVerb)[conjVerbLen] == 'T' || (*conjVerb)[conjVerbLen] == 'D') 
+			strcat(*conjVerb, "ET"); 
+		else 
+			strcat(*conjVerb, "T"); 
+	} else if(strcmp(subPronoun, "WIR") == 0 || strcmp(subPronoun, "SIEP") == 0) {
+		if(strcmp(*conjVerb, "TU") == 0) 
+			strcat(*conjVerb, "N"); 
+		else 
+			strcat(*conjVerb, "EN"); 
+	}
 }
