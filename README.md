@@ -1,0 +1,5 @@
+<b>GVC</b> is the C component of my coding sample for my University of Washington application for the master’s degree program in Computational Linguistics. This was a late addition when I found I had time to add another coding sample before I needed to submit my application
+
+<i>GVC</i> stands for <i>German Verb Conjugator</i>. This program, which runs in a terminal and was compiled using GCC on <b><i>Linux</i></b>, should deal with most if not all verbs in German in the present tense. It my hiccup a bit when dealing with verbs that have both inseperable and separable prefixes, but it will, without a doubt, deal with verbs that have just one of the two.
+
+As for necessary files, grabbing the <i>gvc</i> executable is obvious, but you will also need <i>stem_change_verbs.txt</i>. That text file is how the program knows which verbs have stem changes. The text file should be placed in the same directory as the executable. If I missed any verbs, and you'd like to add them, it's as simple as popping in a new verb at the end of the file and adding the correct code after a comma just as the rest of the file looks.
